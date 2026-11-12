@@ -1109,7 +1109,10 @@ func (h *WikiPageHandler) SearchPages(c *gin.Context) {
 
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
-	pages, err := h.wikiService.SearchPages(c.Request.Context(), kbID, query, limit)
+	// Search-box input is plain text. Use the literal path so PostgreSQL's
+	// regex-backed implementation cannot interpret characters such as `(`,
+	// `[`, or `+` as regular-expression syntax.
+	pages, err := h.wikiService.SearchPagesLiteral(c.Request.Context(), kbID, query, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
